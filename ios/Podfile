@@ -4,7 +4,7 @@ platform :ios, '11.0'
 target 'Runner' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
-
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   # Pods for Runner
 
   target 'RunnerTests' do
