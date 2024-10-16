@@ -1,5 +1,7 @@
+
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,12 +15,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MyAIS Demo',
+      title: 'MyAIS',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const AISHomePage(title: 'MyAIS Demo'),
+      home: const AISHomePage(title: 'MyAIS'),
     );
   }
 }
@@ -40,17 +43,35 @@ class _AISPageState extends State<AISHomePage> {
     // Initialize the WebView controller
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse('https://webakun.altrak1978.co.id/')); // Updated method
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (String url) {
+            _refreshZoom();
+          },
+          onPageStarted: (String url) {
+            _refreshZoom();
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse('https://webakun.altrak1978.co.id/'));
+  }
+
+  Future<void> _refreshZoom() async {
+    // Introduce a slight delay to ensure all scripts are loaded
+    // Future.delayed(const Duration(milliseconds: 300));
+    // Inject JavaScript to allow pinch-to-zoom
+    _controller.runJavaScript(
+      "document.querySelector('meta[name=viewport]').setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes');"
+    );
+    _controller.clearCache();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        // title: const Text("MyAIS"),
-      ),
-      body: WebViewWidget(controller: _controller),
+      body: SafeArea(
+        child: WebViewWidget(controller: _controller,),
+      )
       );
   }
 }
